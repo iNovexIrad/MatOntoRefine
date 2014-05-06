@@ -44,7 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 </head>
 <body>
   <div id="header">
-    <img alt="OpenRefine" src="images/logo-openrefine-30.png" width="129" height="29" />
+    <img alt="OpenRefine" src="images/logo-matonto-30.png" width="129" height="49" />
     <span id="slogan"></span>
   </div>
   
