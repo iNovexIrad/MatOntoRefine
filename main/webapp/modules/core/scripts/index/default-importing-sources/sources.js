@@ -125,8 +125,8 @@ MatProjImportingSourceUI.prototype.attachUI = function(bodyDiv) {
 		if ($.trim(self._elmts.elmtInput[0].value).length === 0 || $.trim(self._elmts.apiInput[0].value).length === 0 ) {
 			window.alert($.i18n._('core-index-import')["warning-matproj"]);
 		} else {
-			//self._controller.startImportJob(self._elmts.form, $.i18n._('core-index-import')["downloading-data"]);
-			window.alert("Materials Project import not yet implemented.");
+			self._controller.startImportJob(self._elmts.form, $.i18n._('core-index-import')["downloading-data"]);
+			//window.aler("Materials Project import not yet implemented.");
 		}
 	});
 	
