@@ -67,6 +67,7 @@
 		"uploading-data": "Uploading data ...",
 		"web-address": "Web Addresses (URLs)",
 		"warning-web-address": "You must specify a web address (URL) to import.",
+		"warning-matproj": "You must specify elements and an API key.",
 		"downloading-data": "Downloading data ...",
 		"clipboard": "Clipboard",
 		"warning-clipboard": "You must paste some data to import.",

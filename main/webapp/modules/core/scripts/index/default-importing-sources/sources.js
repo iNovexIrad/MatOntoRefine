@@ -76,7 +76,7 @@ UrlImportingSourceUI.prototype.attachUI = function(bodyDiv) {
   var self = this;
 
   bodyDiv.html(DOM.loadHTML("core", "scripts/index/default-importing-sources/import-from-web-form.html"));
-
+  
   this._elmts = DOM.bind(bodyDiv);
   
   $('#or-import-enterurl').text($.i18n._('core-index-import')["enter-url"]);
@@ -99,6 +99,43 @@ UrlImportingSourceUI.prototype.focus = function() {
   this._elmts.urlInput.focus();
 };
 
+
+function MatProjImportingSourceUI(controller) {
+	this._controller = controller;
+}
+Refine.DefaultImportingController.sources.push({
+	"label": "Materials Project",
+	"id": "matproj",
+	"uiClass":MatProjImportingSourceUI
+});
+
+MatProjImportingSourceUI.prototype.attachUI = function(bodyDiv) {
+	var self = this;
+	
+	bodyDiv.html(DOM.loadHTML("core", "scripts/index/default-importing-sources/import-from-matproj-form.html"));
+	
+	this._elmts = DOM.bind(bodyDiv);
+	
+	$('#or-import-matproj-api').text("Enter Materials Project API Key:");
+	$('#or-import-matproj').text("Enter elements:");
+
+	this._elmts.nextButton.html($.i18n._('core-buttons')["next"]);
+	
+	this._elmts.nextButton.click(function(evt) {
+		if ($.trim(self._elmts.elmtInput[0].value).length === 0 || $.trim(self._elmts.apiInput[0].value).length === 0 ) {
+			window.alert($.i18n._('core-index-import')["warning-matproj"]);
+		} else {
+			//self._controller.startImportJob(self._elmts.form, $.i18n._('core-index-import')["downloading-data"]);
+			window.alert("Materials Project import not yet implemented.");
+		}
+	});
+	
+	
+};
+MatProjImportingSourceUI.prototype.focus = function() {
+	  this._elmts.textInput.focus();
+};
+	
 function ClipboardImportingSourceUI(controller) {
   this._controller = controller;
 }
@@ -112,7 +149,7 @@ ClipboardImportingSourceUI.prototype.attachUI = function(bodyDiv) {
   var self = this;
 
   bodyDiv.html(DOM.loadHTML("core", "scripts/index/default-importing-sources/import-from-clipboard-form.html"));
-
+  
   this._elmts = DOM.bind(bodyDiv);
   
   $('#or-import-clipboard').text($.i18n._('core-index-import')["clipboard-label"]);
