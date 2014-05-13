@@ -37,6 +37,78 @@ function ExtensionBar(div) {
 }
 
 ExtensionBar.MenuItems = [
+			{
+				"id":"matProjSkeleton",
+				"label": "Materials Project",
+				"submenu" : [
+					{
+						"id": "matProj/apply-rdf-schema",
+						label: "Apply Materials Project RDF Skeleton",
+						click: function() {
+							var fixJson = function(json) {
+								json = json.trim();
+								if (!json.startsWith("[")) {
+									json = "[" + json;
+								}
+								if (!json.endsWith("]")) {
+									json = json + "]";
+								}
+
+								return json.replace(/\}\s*\,\s*\]/g, "} ]").replace(/\}\s*\{/g, "}, {");
+							};
+							var json;
+							/*$.ajax({
+								dataType: "json",
+								url: "scripts/project/MaterialsProjectRDF.html",
+								
+								success: 
+									function(result){           s
+										//handling of your json data
+										try {
+											/*json = result;
+											alert(json);
+											json = fixJson(json);
+											json = JSON.parse(result);
+										}
+										catch (e) {
+											alert(json);
+											return;
+										}
+									}
+							});
+							var frame = $(DOM.loadHTML("core", "scripts/project/MaterialsProjectRDF.html"));
+							this._elmts = DOM.bind(frame);
+							var json;
+							try {
+								json = $('#RDFjson').text;
+								alert(json);
+								json = fixJson(json);
+								json = JSON.parse(json);
+							}
+							catch (e) {
+								alert(json);
+								return;
+							}
+
+							Refine.postCoreProcess(
+								"apply-operations",
+								{},
+								{ operations: JSON.stringify(json) },
+								{ everythingChanged: true },
+								{
+									onDone: function(o) {
+										if (o.code == "pending") {
+											// Something might have already been done and so it's good to update
+											//Refine.update({ everythingChanged: true });
+										}
+									}
+								}
+							);*/
+							
+						}
+					}
+				]
+			}
 ];
 
 ExtensionBar.addExtensionMenu = function(what) {
