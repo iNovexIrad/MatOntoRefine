@@ -53,13 +53,23 @@ function init() {
 
   // Style files to inject into /project page
   ClientSideResourceManager.addPaths(
-    "project/styles",
+    "index/scripts",
     module,
     [
-      "styles/project-injection.less"
+      "scripts/matproj-extension.js",
+      "scripts/index/importing-controller.js",
+
+    ]
+  );
+    ClientSideResourceManager.addPaths(
+    "index/styles",
+    module,
+    [
+      "styles/importing-controller.less"
     ]
   );
 }
+
 
 /*
  * Function invoked to handle each request in a custom way.

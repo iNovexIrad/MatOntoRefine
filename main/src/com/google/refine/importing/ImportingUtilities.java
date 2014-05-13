@@ -237,24 +237,48 @@ public class ImportingUtilities {
             String name = fileItem.getFieldName().toLowerCase();
             if (fileItem.isFormField()) {
 				if(name.equals("matproj") ){
+					
+					FileItem apiFile = null;
+					for(FileItem fileI : tempFiles) {
+						InputStream s = fileI.getInputStream();
+						String n = fileI.getFieldName().toLowerCase();
+						if(fileI.isFormField() && n.equals("api"))
+							apiFile = fileI;
+					}
+					if(!apiFile.getFieldName().toLowerCase().equals("api"))
+						throw new Exception();
+					
+					InputStream apiStream = apiFile.getInputStream();
+					
+					
 					System.setProperty("jsse.enableSNIExtension", "false");
 					String elementsString = Streams.asString(stream);
 					String urlString = Streams.asString(stream);
 					logger.warn(elementsString);
 					
 				
-					String apiKey = "9tUO2ZJurlSeaFym";
+					String apiKey = Streams.asString(apiStream);
+					
 					InputStream is;
 					JsonReader jsread;
 					String material = elementsString;
 					String fileName = "output" + material + ".csv";
 				
 					try{
+						/*URL apiCheck = new URL("https://www.materialsproject.org/rest/v1/api_check?api_key=" + apiKey);
+						is = apiCheck.openStream();
+						jsread = Json.createReader(is);
+						JsonObject jobj = jsread.readObject();
+						JsonString apiStatus = jobj.getJsonString("api_key_valid");
+						if(!apiStatus.equals("true"))
+							throw new Exception();*/
+						
+						
 						URL matProjURL = new URL("https://www.materialsproject.org/rest/v1/materials/" + material + "/vasp?API_KEY=" + apiKey);
 						is = matProjURL.openStream();
-						logger.warn("opened stream!");
+						//logger.warn("opened stream!");
 						jsread = Json.createReader(is);
-						logger.warn("created Reader!");
+						//logger.warn("created Reader!");
 						JsonObject obj = jsread.readObject();
 						JsonArray results = obj.getJsonArray("response");
 						File file = new File(rawDataDir, "output" + material + ".csv");
