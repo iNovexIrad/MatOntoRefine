@@ -37,11 +37,13 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.text.NumberFormat;
@@ -81,6 +83,8 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import au.com.bytecode.opencsv.CSVWriter;
+
 import com.google.refine.ProjectManager;
 import com.google.refine.ProjectMetadata;
 import com.google.refine.RefineServlet;
@@ -88,6 +92,9 @@ import com.google.refine.importing.ImportingManager.Format;
 import com.google.refine.importing.UrlRewriter.Result;
 import com.google.refine.model.Project;
 import com.google.refine.util.JSONUtilities;
+
+import javax.json.*;
+
 
 public class ImportingUtilities {
     final static protected Logger logger = LoggerFactory.getLogger("importing-utilities");
@@ -230,15 +237,80 @@ public class ImportingUtilities {
             String name = fileItem.getFieldName().toLowerCase();
             if (fileItem.isFormField()) {
 				if(name.equals("matproj") ){
+					System.setProperty("jsse.enableSNIExtension", "false");
 					String elementsString = Streams.asString(stream);
 					String urlString = Streams.asString(stream);
 					logger.warn(elementsString);
+					
 				
-                    URL url = new URL("https://www.materialsproject.org/rest/v1/materials/" + elementsString + "/vasp?API_KEY=9tUO2ZJurlSeaFym" );
+					String apiKey = "9tUO2ZJurlSeaFym";
+					InputStream is;
+					JsonReader jsread;
+					String material = elementsString;
+					String fileName = "output" + material + ".csv";
+				
+					try{
+						URL matProjURL = new URL("https://www.materialsproject.org/rest/v1/materials/" + material + "/vasp?API_KEY=" + apiKey);
+						is = matProjURL.openStream();
+						logger.warn("opened stream!");
+						jsread = Json.createReader(is);
+						logger.warn("created Reader!");
+						JsonObject obj = jsread.readObject();
+						JsonArray results = obj.getJsonArray("response");
+						File file = new File(rawDataDir, "output" + material + ".csv");
+						
+						progress.setProgress("Formatting... (This may take a while)", -1);
+						
+						logger.warn(file.getPath());
+						CSVWriter writer = new CSVWriter(new FileWriter(file), '\t');
+						String[] headers = {"Material ID" , "Formula" , "Pretty Formula", "Number of Elements",
+											"Final Energy/Atom", "Band Gap", "Volume", "Density", "Total Magnetization",
+											"Spacegroup Number","Spacegroup symbol","Spacegroup Point Group", "Spacegroup hall", "Spacegroup crystal system", "Experiments"};
+						writer.writeNext(headers);
+						
+						int count = 0;
+						for(JsonObject result :  results.getValuesAs(JsonObject.class)) {
+							count++;
+							writeJSONtoCSVLine(writer, result);
+							progress.setProgress("Formatting... (This may take a while)", (int)(((double)count/(double)results.size()) * 100));
+		
+						}
+
+						writer.close();
+						
+						//file = allocateFile(rawDataDir, fileName);
+                    
+						JSONObject fileRecord = new JSONObject();
+						JSONUtilities.safePut(fileRecord, "origin", "upload");
+						JSONUtilities.safePut(fileRecord, "declaredEncoding", request.getCharacterEncoding());
+						JSONUtilities.safePut(fileRecord, "declaredMimeType", fileItem.getContentType());
+						JSONUtilities.safePut(fileRecord, "fileName", fileName);
+						JSONUtilities.safePut(fileRecord, "location", getRelativePath(file, rawDataDir));
+						long fileSize = file.getTotalSpace();
+						progress.setProgress(
+							"Saving file " + fileName + " locally (" + formatBytes(fileSize) + " bytes)",
+							calculateProgressPercent(update.totalExpectedSize, update.totalRetrievedSize));
+							logger.warn(file.getPath());
+						//JSONUtilities.safePut(fileRecord, "size", saveStreamToFile(stream, file, null));
+						if (postProcessRetrievedFile(rawDataDir, file, fileRecord, fileRecords, progress)) {
+							archiveCount++;
+						}
+                    
+						uploadCount++;
+					
+					}catch(Exception e){
+						logger.warn("ERROR!");
+						logger.warn(e.getMessage());
+						throw new Exception("Unable to load from Materials Project");
+					}
+					
+					
+				
+                    /*URL url = new URL("https://www.materialsproject.org/rest/v1/materials/" + elementsString + "/vasp?API_KEY=9tUO2ZJurlSeaFym" );
                     
                     JSONObject fileRecord = new JSONObject();
-                    JSONUtilities.safePut(fileRecord, "origin", "download");
                     JSONUtilities.safePut(fileRecord, "url", urlString);
+r                   JSONUtilities.safePut(fileRecord, "origin", "download");
                     
                     for (UrlRewriter rewriter : ImportingManager.urlRewriters) {
                         Result result = rewriter.rewrite(urlString);
@@ -326,7 +398,7 @@ public class ImportingUtilities {
                         } finally {
                             stream2.close();
                         }
-                    }
+                    }*/
                 }else if (name.equals("clipboard")) {
                     String encoding = request.getCharacterEncoding();
                     if (encoding == null) {
@@ -493,6 +565,86 @@ public class ImportingUtilities {
         JSONUtilities.safePut(retrievalRecord, "downloadCount", downloadCount);
         JSONUtilities.safePut(retrievalRecord, "clipboardCount", clipboardCount);
         JSONUtilities.safePut(retrievalRecord, "archiveCount", archiveCount);
+    }
+	
+
+    private static String[] concatStringArrays(String[] a, String[] b){
+        String[] result = new String[a.length + b.length];
+
+        int count = 0;
+        for(String x : a){
+            result[count++] = x;
+        }
+        for(String y : b){
+            result[count++] = y;
+        }
+
+        return result;
+
+    }
+    
+    private static String[] getExperimentData(String compound) throws MalformedURLException, IOException{
+        URL matExpURL = new URL("https://www.materialsproject.org/rest/v1/materials/" + compound + "/exp?API_KEY=9tUO2ZJurlSeaFym");
+        boolean connected = false;
+        InputStream is;
+        int count = 0;
+        while(!connected && count < 5){
+            try{
+                is = matExpURL.openStream();
+                connected = true;
+                JsonReader jsread = Json.createReader(is);
+
+                JsonObject obj = jsread.readObject();
+                JsonArray results = obj.getJsonArray("response");
+
+                String[] experiments = new String[0];
+
+                for(JsonObject result :  results.getValuesAs(JsonObject.class)) {
+                    String[] temp = {result.toString()};
+                    experiments = concatStringArrays(experiments, temp);
+                }
+
+                return experiments;
+
+            }catch (Exception e){
+
+                System.out.println("Unable to connect. Trying again. Attempt: " + count);
+            }
+            count++;
+
+            if(count >= 5 && !connected)
+                throw new java.net.ConnectException();
+        }
+        return null;
+    }
+    
+    private static void writeJSONtoCSVLine (CSVWriter writer, JsonObject result) throws MalformedURLException, IOException{
+        String matID = result.getJsonString("material_id").toString();
+        matID = matID.substring(1, matID.length()-1);
+
+        String formula = result.getJsonString("full_formula").toString();
+        formula = formula.substring(1, formula.length()-1);
+
+        String prettyFormula = result.getJsonString("pretty_formula").toString();
+        prettyFormula = prettyFormula.substring(1,prettyFormula.length()-1);
+
+        JsonObject spaceGroup = result.getJsonObject("spacegroup");
+        String sgSymbol = spaceGroup.getJsonString("symbol").getString();
+        String sgNumber = spaceGroup.getJsonNumber("number").toString();
+        String sgCrystalSystem = spaceGroup.getJsonString("crystal_system").getString();
+        String sgHall = spaceGroup.getJsonString("hall").getString();
+        String sgPGroup = spaceGroup.getJsonString("point_group").getString();
+
+
+
+        String[] data = {matID, formula, prettyFormula,
+                result.getJsonNumber("nelements").toString(), result.getJsonNumber("energy").toString(),
+                result.getJsonNumber("band_gap").toString(), result.getJsonNumber("volume").toString(),
+                result.getJsonNumber("density").toString(),result.getJsonNumber("total_magnetization").toString(),
+                sgNumber, sgSymbol,sgPGroup, sgHall, sgCrystalSystem};
+
+        String[] nextLine = concatStringArrays(data, getExperimentData(formula));
+        writer.writeNext(nextLine);
     }
 
     private static boolean saveStream(InputStream stream, URL url, File rawDataDir, final Progress progress,
