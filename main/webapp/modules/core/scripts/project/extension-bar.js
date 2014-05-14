@@ -65,10 +65,10 @@ ExtensionBar.MenuItems = [
 								var json;
 								rawFile.onreadystatechange = function ()
 								{
-									alert(rawFile.readyState);
+									//alert(rawFile.readyState);
 									if(rawFile.readyState === 4)
 									{
-										alert(rawFile.status);
+										//alert(rawFile.status);
 										if(rawFile.status === 200 || rawFile.status == 0)
 										{
 											json = rawFile.responseText;
