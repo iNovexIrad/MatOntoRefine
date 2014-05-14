@@ -56,54 +56,58 @@ ExtensionBar.MenuItems = [
 
 								return json.replace(/\}\s*\,\s*\]/g, "} ]").replace(/\}\s*\{/g, "}, {");
 							};
-							var json;
-							/*$.ajax({
-								dataType: "json",
-								url: "scripts/project/MaterialsProjectRDF.html",
-								
-								success: 
-									function(result){           s
-										//handling of your json data
-										try {
-											/*json = result;
-											alert(json);
-											json = fixJson(json);
-											json = JSON.parse(result);
-										}
-										catch (e) {
-											alert(json);
-											return;
-										}
-									}
-							});
-							var frame = $(DOM.loadHTML("core", "scripts/project/MaterialsProjectRDF.html"));
-							this._elmts = DOM.bind(frame);
-							var json;
-							try {
-								json = $('#RDFjson').text;
-								alert(json);
-								json = fixJson(json);
-								json = JSON.parse(json);
-							}
-							catch (e) {
-								alert(json);
-								return;
-							}
-
-							Refine.postCoreProcess(
-								"apply-operations",
-								{},
-								{ operations: JSON.stringify(json) },
-								{ everythingChanged: true },
+							
+							function readTextFile()
+							{
+								//var json;
+								var rawFile = new XMLHttpRequest();
+								rawFile.open("GET", "scripts/project/MaterialsProjectRDFjson.html", false);
+								var json;
+								rawFile.onreadystatechange = function ()
 								{
-									onDone: function(o) {
-										if (o.code == "pending") {
-											// Something might have already been done and so it's good to update
-											//Refine.update({ everythingChanged: true });
+									alert(rawFile.readyState);
+									if(rawFile.readyState === 4)
+									{
+										alert(rawFile.status);
+										if(rawFile.status === 200 || rawFile.status == 0)
+										{
+											json = rawFile.responseText;
+											
+											try {
+												//alert(json);
+												//json = fixJson(json);
+												json = JSON.parse(json);
+												
+											}
+											catch (e) {
+												//alert(json);
+												return;
+											}
+											Refine.postCoreProcess(
+												"apply-operations",
+												{},
+												{ operations: JSON.stringify(json) },
+												{ everythingChanged: true },
+												{
+													onDone: function(o) {
+														if (o.code == "pending") {
+															// Something might have already been done and so it's good to update
+															//Refine.update({ everythingChanged: true });
+														}
+													}
+												}
+											);
+											
 										}
 									}
 								}
-							);*/
+								rawFile.send(null);
+								
+								
+							}
+							var json;
+							json = readTextFile();
+							
 							
 						}
 					}
