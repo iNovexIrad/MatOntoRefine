@@ -37,6 +37,7 @@ function ExtensionBar(div) {
 }
 
 ExtensionBar.MenuItems = [
+			
 			{
 				"id":"matProjSkeleton",
 				"label": "Materials Project",

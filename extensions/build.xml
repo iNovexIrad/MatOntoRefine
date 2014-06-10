@@ -15,7 +15,6 @@
     <ant dir="gdata/" target="build" />
     <ant dir="pc-axis/" target="build" />
 	<ant dir="rdf-extension/" target="build" />
-
   </target>
 
   <target name="clean">
@@ -26,6 +25,5 @@
     <ant dir="gdata/" target="clean" />
     <ant dir="pc-axis/" target="clean" />
 	<ant dir="rdf-extension/" target="clean" />
-
   </target>
 </project>
