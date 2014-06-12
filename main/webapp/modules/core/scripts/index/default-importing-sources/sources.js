@@ -100,6 +100,30 @@ UrlImportingSourceUI.prototype.focus = function() {
 };
 
 
+function MatOntoPublishQueryUI(controller) {
+	this._controller = controller;
+}
+
+Refine.DefaultImportingController.sources.push({
+	"label": "Publish Query",
+	"id" : "pubQuery",
+	"uiClass" :MatOntoPublishQueryUI
+});
+
+MatOntoPublishQueryUI.prototype.focus = function() {
+		//this._elmts.textInput.focus();
+};
+
+MatOntoPublishQueryUI.prototype.attachUI = function(bodyDiv) {
+	var self = this;
+	
+	bodyDiv.html(DOM.loadHTML("core", "scripts/index/default-importing-sources/publish-query-form.html"));
+	
+	this._elmts = DOM.bind(bodyDiv);
+	
+	
+}
+
 function MatProjImportingSourceUI(controller) {
 	this._controller = controller;
 }
@@ -108,6 +132,8 @@ Refine.DefaultImportingController.sources.push({
 	"id": "matproj",
 	"uiClass":MatProjImportingSourceUI
 });
+
+
 
 MatProjImportingSourceUI.prototype.attachUI = function(bodyDiv) {
 	var self = this;
@@ -133,7 +159,7 @@ MatProjImportingSourceUI.prototype.attachUI = function(bodyDiv) {
 	
 };
 MatProjImportingSourceUI.prototype.focus = function() {
-	  this._elmts.textInput.focus();
+	  //this._elmts.textInput.focus();
 };
 	
 function ClipboardImportingSourceUI(controller) {
