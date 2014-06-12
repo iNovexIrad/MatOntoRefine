@@ -23,3 +23,6 @@ broker/core/data/
 broker/core/test-output/
 tmp/
 /test-output
+
+#IDEA
+*.iml
