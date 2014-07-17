@@ -40,11 +40,11 @@ ExtensionBar.MenuItems = [
 			
 			{
 				"id":"matProjSkeleton",
-				"label": "Materials Project",
+				"label": "Apply RDF Skeleton",
 				"submenu" : [
 					{
 						"id": "matProj/apply-rdf-schema",
-						label: "Apply Materials Project RDF Skeleton",
+						label: "Apply new Skeleton",
 						click: function() {
 							var fixJson = function(json) {
 								json = json.trim();
@@ -61,57 +61,97 @@ ExtensionBar.MenuItems = [
 							function readTextFile()
 							{
 								//var json;
-								var rawFile = new XMLHttpRequest();
-								rawFile.open("GET", "scripts/project/MaterialsProjectRDFjson.html", false);
-								var json;
-								rawFile.onreadystatechange = function ()
-								{
-									//alert(rawFile.readyState);
-									if(rawFile.readyState === 4)
+								if(document.getElementById('uploadRadio').checked == false){
+									var rawFile = new XMLHttpRequest();
+									if($('input[name=skeleton]:radio:checked').val() == "matRadio")
+										alert("Applying matProj");
+									rawFile.open("GET", "scripts/project/MaterialsProjectRDFjson.html", false);
+									var json;
+									rawFile.onreadystatechange = function ()
 									{
-										//alert(rawFile.status);
-										if(rawFile.status === 200 || rawFile.status == 0)
+										//alert(rawFile.readyState);
+										if(rawFile.readyState === 4)
 										{
-											json = rawFile.responseText;
-											
-											try {
-												//alert(json);
-												//json = fixJson(json);
-												json = JSON.parse(json);
+											//alert(rawFile.status);
+											if(rawFile.status === 200 || rawFile.status == 0)
+											{
+												json = rawFile.responseText;
 												
-											}
-											catch (e) {
-												//alert(json);
-												return;
-											}
-											Refine.postCoreProcess(
-												"apply-operations",
-												{},
-												{ operations: JSON.stringify(json) },
-												{ everythingChanged: true },
-												{
-													onDone: function(o) {
-														if (o.code == "pending") {
-															// Something might have already been done and so it's good to update
-															//Refine.update({ everythingChanged: true });
+												try {
+													//alert(json);
+													//json = fixJson(json);
+													json = JSON.parse(json);
+													
+												}
+												catch (e) {
+													//alert(json);
+													return;
+												}
+												Refine.postCoreProcess(
+													"apply-operations",
+													{},
+													{ operations: JSON.stringify(json) },
+													{ everythingChanged: true },
+													{
+														onDone: function(o) {
+															if (o.code == "pending") {
+																// Something might have already been done and so it's good to update
+																//Refine.update({ everythingChanged: true });
+															}
 														}
 													}
-												}
-											);
-											
+												);
+												
+											}
 										}
 									}
+									rawFile.send(null);
 								}
-								rawFile.send(null);
-								
 								
 							}
+							var frame = DialogSystem.createDialog();
+							
+							frame.width("600px");
+							
+							var header = $('<div></div>').addClass("dialog-header").text("Publish Data").appendTo(frame);
+							var body = $('<div>Please choose an RDF Skeleton to apply:</div>').addClass("dialog-body").appendTo(frame);
+							var form = $('<form id="skeletonSelect"></form>').appendTo(body);
+							var option1 = $('<input type="radio" name="skeleton" id="matRadio" value="matProj" checked>Materials Project<br>').click(function(){
+									document.getElementById('fileUploadForm').disabled = true;
+				
+								}).appendTo(form);
+							var option2 = $('<input type="radio" name="skeleton" id="scdRadio" value="scd">SCD<br>').click(function(){
+									document.getElementById('fileUploadForm').disabled = true;
+									
+								}).appendTo(form);
+							var optionUpload= $('<input type="radio" name="skeleton" id="uploadRadio" value="upload">Upload<br>').click(function(){
+									document.getElementById('fileUploadForm').disabled = false;
+									
+								}).appendTo(form);
+							var upload = $('<input type="file" id="fileUploadForm" name="fileUpload" disabled></input>').appendTo(form);
+							
+							
+							var footer = $('<div></div>').addClass("dialog-footer").appendTo(frame);
+							$('<button></button>').addClass('button').text("Cancel").click(function() {
+								DialogSystem.dismissUntil(0);
+								}).appendTo(footer);
+								
+							$('<button id="applySkel"></button>').addClass('button').text("Apply").click(function(){
+									readTextFile();
+									DialogSystem.dismissUntil(0);
+								}).appendTo(footer);
+								
+								
+							DialogSystem.showDialog(frame);
+							document.getElementById('fileUploadForm').disabled = true;
+							document.getElementById('uploadRadio').disabled = true;
 							var json;
-							json = readTextFile();
+							//json = readTextFile();
 							
 							
 						}
 					}
+					
 				]
 			}
 ];
