@@ -63,9 +63,11 @@ ExtensionBar.MenuItems = [
 								//var json;
 								if(document.getElementById('uploadRadio').checked == false){
 									var rawFile = new XMLHttpRequest();
-									if($('input[name=skeleton]:radio:checked').val() == "matRadio")
-										alert("Applying matProj");
-									rawFile.open("GET", "scripts/project/MaterialsProjectRDFjson.html", false);
+									if(document.getElementById('matRadio').checked == true){
+										rawFile.open("GET", "scripts/project/MaterialsProjectRDFjson.html", false);
+									}else if(document.getElementById('scdRadio').checked == true){
+										rawFile.open("GET", "scripts/project/SCDRDFjson.html", false);
+									}
 									var json;
 									rawFile.onreadystatechange = function ()
 									{
