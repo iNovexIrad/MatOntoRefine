@@ -107,7 +107,53 @@ ExtensionBar.MenuItems = [
 											}
 										}
 									}
+									DialogSystem.dismissUntil(0);
 									rawFile.send(null);
+									
+								}
+								else{
+									var skelUpld = document.getElementById("fileUploadForm");
+									if(skelUpld.files.length == 0){
+										alert("Please add a file");
+									}else{
+										var textFile = skelUpld.files[0];
+										
+										try{
+											var reader = new FileReader();
+											reader.readAsText(textFile);
+											$(reader).on('load', processFile);
+											function processFile(e){
+												var fileText = e.target.result, results;
+												
+												var json;
+												try{
+													console.log(fileText);
+													json = JSON.parse(fileText);
+													//alert("parsed");
+													Refine.postCoreProcess(
+														"apply-operations",
+														{},
+														{ operations: JSON.stringify(json) },
+														{ everythingChanged: true },
+														{
+															onDone: function(o) {
+																if (o.code == "pending") {
+																	// Something might have already been done and so it's good to update
+																	//Refine.update({ everythingChanged: true });
+																}
+															}
+														}
+													);
+												}catch (e){
+													console.log(e);
+												}
+											}
+											DialogSystem.dismissUntil(0);
+										}catch(e){
+											alert("Error reading file.");
+										}
+									}
+									
 								}
 								
 							}
@@ -140,13 +186,13 @@ ExtensionBar.MenuItems = [
 								
 							$('<button id="applySkel"></button>').addClass('button').text("Apply").click(function(){
 									readTextFile();
-									DialogSystem.dismissUntil(0);
+									
 								}).appendTo(footer);
 								
 								
 							DialogSystem.showDialog(frame);
 							document.getElementById('fileUploadForm').disabled = true;
-							document.getElementById('uploadRadio').disabled = true;
+							//document.getElementById('uploadRadio').disabled = true;
 							var json;
 							//json = readTextFile();
 							
