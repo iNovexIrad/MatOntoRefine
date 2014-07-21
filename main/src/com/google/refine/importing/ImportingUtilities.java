@@ -262,7 +262,7 @@ public class ImportingUtilities {
 					InputStream is;
 					JsonReader jsread;
 					String material = elementsString;
-					String fileName = "output" + material + ".csv";
+					String fileName = "matproj" + material + ".csv";
 				
 					try{
 						/*URL apiCheck = new URL("https://www.materialsproject.org/rest/v1/api_check?api_key=" + apiKey);

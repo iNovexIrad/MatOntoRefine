@@ -200,7 +200,8 @@ HistoryPanel.prototype._showExtractOperationsDialog = function(json) {
   elmts.selectAllButton.html($.i18n._('core-buttons')["select-all"]);
   elmts.unselectAllButton.html($.i18n._('core-buttons')["unselect-all"]);
   elmts.closeButton.html($.i18n._('core-buttons')["close"]);
-
+  elmts.exportButton.html("Export");
+  
   var entryTable = elmts.entryTable[0];
   var createEntry = function(entry) {
     var tr = entryTable.insertRow(entryTable.rows.length);
@@ -238,12 +239,18 @@ HistoryPanel.prototype._showExtractOperationsDialog = function(json) {
   updateJson();
 
   elmts.closeButton.click(function() { DialogSystem.dismissUntil(level - 1); });
+  
+  elmts.exportButton.click(function() {
+	var myJson = elmts.textarea.text();
+	window.open('data:application/json;charset=utf-8,' + myJson);
+  });
+  
   elmts.selectAllButton.click(function() {
     for (var i = 0; i < json.entries.length; i++) {
       json.entries[i].selected = true;
     }
 
-    frame.find('input[type="checkbox"]').attr("checked", "true");
+    frame.find("about:blank", 'input[type="checkbox"]').attr("checked", "true");
     updateJson();
   });
   elmts.unselectAllButton.click(function() {
