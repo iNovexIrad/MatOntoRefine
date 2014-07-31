@@ -386,16 +386,15 @@ HistoryPanel.prototype._showExtractOperationsDialog = function(json) {
 	//
 	//*********************************************
 	console.log(myJson);
-	alert(theProject.metadata.name);
+	//alert(theProject.metadata.name);
 	apiKey = document.getElementById("api_key").value;
-	var jsonStuff = {"ckan_api":apiKey, "skeleton_body":"smegma", "DataName":theProject.metadata.name};
 	$.ajax({
 		type: "POST",
 		url: "http://10.10.1.187:8080/MatRest/Publish/refine_skeleton?DataName=" + theProject.metadata.name + "&CkanApi=5662a180-bff3-4d3e-974d-8ffdc4a1d7ac",
 		dataType: 'json',
-		data: JSON.stringify(jsonStuff),
+		data: myJson,
 		contentType : 'text/plain',
-		processData:false,
+		processData: false,
 		crossDomain: true,
 		async:false
 		
