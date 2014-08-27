@@ -653,11 +653,38 @@ r                   JSONUtilities.safePut(fileRecord, "origin", "download");
         prettyFormula = prettyFormula.substring(1,prettyFormula.length()-1);
 
         JsonObject spaceGroup = result.getJsonObject("spacegroup");
-        String sgSymbol = spaceGroup.getJsonString("symbol").getString();
-        String sgNumber = spaceGroup.getJsonNumber("number").toString();
-        String sgCrystalSystem = spaceGroup.getJsonString("crystal_system").getString();
-        String sgHall = spaceGroup.getJsonString("hall").getString();
-        String sgPGroup = spaceGroup.getJsonString("point_group").getString();
+		
+        String sgSymbol;
+		try{
+			sgSymbol = spaceGroup.getJsonString("symbol").getString();
+        }catch(Exception e){
+			sgSymbol = "";
+		}
+		String sgNumber;
+		try{
+			sgNumber = spaceGroup.getJsonString("number").getString();
+        }catch(Exception e){
+			sgNumber = "";
+		}
+		String sgCrystalSystem;
+		try{
+			sgCrystalSystem = spaceGroup.getJsonString("crystal_system").getString();
+        }catch(Exception e){
+			sgCrystalSystem = "";
+		}
+        String sgHall;
+		try{
+			sgHall = spaceGroup.getJsonString("hall").getString();
+        }catch(Exception e){
+			sgHall = "";
+		}
+		String sgPGroup;
+		try{
+			sgPGroup = spaceGroup.getJsonString("point_group").getString();
+        }catch(Exception e){
+			sgPGroup = "";
+		}
+       
 
 
 
