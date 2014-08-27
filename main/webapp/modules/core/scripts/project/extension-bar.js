@@ -64,7 +64,8 @@ ExtensionBar.MenuItems = [
 								
 								skelUrl = skels[skelIndex].url;
 							
-								
+								//Send call to MatRest asking for the selected skeleton
+								//Skeleton must be retrieved from MatRest to avoid cross-domain request problems
 								$.ajax({
 									type: "GET",
 									url:'http://10.10.1.187:8080/MatRest/Skeleton/load?url=' + skelUrl,
@@ -72,18 +73,29 @@ ExtensionBar.MenuItems = [
 									async: false
 									
 								}).done(function(msg){
-									json = msg.skeleton_body;
-											
+									try{
+										json = jQuery.parseJSON(msg).skeleton_body;
+									}catch(e){
+										console.log("SMEGMAS");
+										json = msg.skeleton_body;
+									}
+									
+									
 									try {
 										//alert(json);
 										//json = fixJson(json);
+										console.log(json);
 										json = JSON.parse(json);
 										
+
 									}
 									catch (e) {
 										//alert(json);
+										console.log(json);
 										return;
 									}
+									
+									//Apply the selected skeleton
 									Refine.postCoreProcess(
 										"apply-operations",
 										{},
@@ -106,98 +118,7 @@ ExtensionBar.MenuItems = [
 								});
 								
 								
-								/*
-								var json;
-								rawFile.onreadystatechange = function ()
-								{
-									alert(rawFile.readyState);
-									if(rawFile.readyState === 4)
-									{
-										alert(rawFile.status);
-										if(rawFile.status === 200 || rawFile.status == 0)
-										{
-											json = rawFile.responseText;
-											
-											try {
-												//alert(json);
-												//json = fixJson(json);
-												json = JSON.parse(json);
-												
-											}
-											catch (e) {
-												//alert(json);
-												return;
-											}
-											Refine.postCoreProcess(
-												"apply-operations",
-												{},
-												{ operations: JSON.stringify(json) },
-												{ everythingChanged: true },
-												{
-													onDone: function(o) {
-														if (o.code == "pending") {
-															// Something might have already been done and so it's good to update
-															//Refine.update({ everythingChanged: true });
-														}
-													}
-												}
-											);
-											
-										}
-									}
-								}
-								DialogSystem.dismissUntil(0);
-								rawFile.send(null);
-									
-								/* 
-								else{
-									
-									
-									
-									var skelUpld = document.getElementById("fileUploadForm");
-									if(skelUpld.files.length == 0){
-										alert("Please add a file");
-									}else{
-										var textFile = skelUpld.files[0];
-										
-										
-										try{
-											var reader = new FileReader();
-											reader.readAsText(textFile);
-											$(reader).on('load', processFile);
-											function processFile(e){
-												var fileText = e.target.result, results;
-												
-												var json;
-												try{
-													console.log(fileText);
-													json = JSON.parse(fileText);
-													//alert("parsed");
-													Refine.postCoreProcess(
-														"apply-operations",
-														{},
-														{ operations: JSON.stringify(json) },
-														{ everythingChanged: true },
-														{
-															onDone: function(o) {
-																if (o.code == "pending") {
-																	// Something might have already been done and so it's good to update
-																	//Refine.update({ everythingChanged: true });
-																}
-															}
-														}
-													);
-												}catch (e){
-													console.log(e);
-												}
-											}
-											DialogSystem.dismissUntil(0);
-										}catch(e){
-											alert("Error reading file.");
-										}
-									}
-									
-								} */
+								
 								
 							}
 							var frame = DialogSystem.createDialog();
@@ -206,7 +127,7 @@ ExtensionBar.MenuItems = [
 							
 							var skelListFile = new XMLHttpRequest();
 							
-							
+							//Set up loading screen
 							var loadingFrame = DialogSystem.createDialog();
 							var header = $('<div></div>').addClass("dialog-header").text("Publishing").appendTo(loadingFrame);
 							var body = $('<div><img src="images/small-spinner.gif">Sending Request, Please Wait...</div>').addClass("loading-body").appendTo(loadingFrame);
@@ -215,6 +136,8 @@ ExtensionBar.MenuItems = [
 							
 							skelListFile.open("GET", "http://10.10.1.187:8080/MatRest/Skeleton/list", false);
 							
+							
+							//Retrieve list of loaded skeletons from MatRest
 							var skels;
 							var skelListJson;
 							$.ajax({
@@ -229,20 +152,8 @@ ExtensionBar.MenuItems = [
 								console.log(skels);
 							})
 							
-							/* skelListFile.onreadystatechange = function (){
-								if(rawFile.readyState === 4)
-								{
-									//alert(rawFile.status);
-									if(rawFile.status === 200 || rawFile.status == 0)
-									{
-										DialogSystem.dismissUntil(0);
-										skelListJson = rawFile.responseText;
-										console.log(skelListJson);
-										
-									}
-								}
-							} */
-							//console.log(skelListJson.skeletons);
+
+							
 							
 							var header = $('<div></div>').addClass("dialog-header").text("Publish Data").appendTo(frame);
 							var body = $('<div>Please choose an RDF Skeleton to apply:</div>').addClass("dialog-body").appendTo(frame);
@@ -388,9 +299,17 @@ HistoryPanel.prototype._showExtractOperationsDialog = function(json) {
 	console.log(myJson);
 	//alert(theProject.metadata.name);
 	apiKey = document.getElementById("api_key").value;
+	var restUrl;
+	if(document.getElementById('rest_url') != null){
+	 restUrl = document.getElementById('rest_url').value;
+	 
+	}else{
+		restUrl = "10.10.1.187"
+	}
+	alert(restUrl);
 	$.ajax({
 		type: "POST",
-		url: "http://10.10.1.187:8080/MatRest/Publish/refine_skeleton?DataName=" + theProject.metadata.name + "&CkanApi=5662a180-bff3-4d3e-974d-8ffdc4a1d7ac",
+		url: "http://" + restUrl + ":8080/MatRest/Publish/refine_skeleton?DataName=" + theProject.metadata.name + "&CkanApi=5662a180-bff3-4d3e-974d-8ffdc4a1d7ac",
 		dataType: 'json',
 		data: myJson,
 		contentType : 'text/plain',
